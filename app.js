@@ -4,13 +4,11 @@ const path = require('path');
 const mongoose = require('mongoose');
 const Campground = require('./models/campground');
 const methodOverride = require('method-override');
+const ejsMate = require('ejs-mate');
 
-mongoose.connect('mongodb://localhost:27017/go-camp', {
-    // useNewUrlParser: true,
-    // useCreateIndex: true,
-    // useUnifiedTopology: true
-});
+mongoose.connect('mongodb://localhost:27017/go-camp');
 
+app.engine('ejs', ejsMate);
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "Connection Error: "));
 db.once("open", () => {
@@ -65,6 +63,10 @@ app.delete('/campgrounds/:id', async (req, res) => {
     const { id } = req.params;
     await Campground.findByIdAndDelete(id);
     res.redirect('/campgrounds');
+})
+
+app.use((req, res) => {
+    res.status(404).send("404 Not Found!");
 })
 
 
