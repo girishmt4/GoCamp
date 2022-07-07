@@ -8,6 +8,8 @@ const ExpressError = require('./utils/ExpressError');
 const methodOverride = require('method-override');
 const ejsMate = require('ejs-mate');
 const { STATUS_CODES } = require('http');
+const Joi = require('joi');
+const { campgroundSchema } = require('./schemas.js')
 
 mongoose.connect('mongodb://localhost:27017/go-camp');
 
@@ -23,6 +25,19 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
+
+const validateCampground = (req, res, next) => {
+    const { error } = campgroundSchema.validate(req.body);
+    if (error) {
+        const msg = error.details.map(el => el.message).join(',');
+        throw new ExpressError(msg, 400);
+    }
+    else {
+        next();
+    }
+}
+
+
 app.get('/', (req, res) => {
     console.log("Hello from GoCamp!!");
     res.render('home');
@@ -37,7 +52,8 @@ app.get('/campgrounds/new', (req, res) => {
     res.render('campgrounds/new');
 })
 
-app.post('/campgrounds', catchAsync(async (req, res, next) => {
+app.post('/campgrounds', validateCampground, catchAsync(async (req, res, next) => {
+
     const campground = req.body.campground;
     const newCampground = new Campground(campground);
     await newCampground.save();
@@ -56,7 +72,7 @@ app.get('/campgrounds/:id/edit', catchAsync(async (req, res) => {
     res.render('campgrounds/edit', { campground });
 }))
 
-app.put('/campgrounds/:id', catchAsync(async (req, res) => {
+app.put('/campgrounds/:id', validateCampground, catchAsync(async (req, res) => {
     const newCampground = req.body.campground;
     const campground = await Campground.findByIdAndUpdate(req.params.id, newCampground);
     res.redirect(`/campgrounds/${campground.id}`);
@@ -75,8 +91,9 @@ app.all('*', (req, res, next) => {
 
 
 app.use((err, req, res, next) => {
-    const { statusCode = 500, message = "Something Went Wrong!" } = err;
-    res.status(statusCode).send(message)
+    const { statusCode = 500 } = err;
+    if (!err.message) err.message = "Something Went Wrong!";
+    res.status(statusCode).render('error', { err })
     // res.send("We got an error!");
 
 })
