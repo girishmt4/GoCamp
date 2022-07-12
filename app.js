@@ -49,9 +49,18 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 app.use((req, res, next) => {
+    console.log(req.session);
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
+    res.locals.currentUser = req.user;
     next();
+})
+
+app.get('/viewcount', (req, res) => {
+    if (req.session.count) { req.session.count += 1; }
+    else { req.session.count = 1; }
+    console.log(req.session.count);
+    res.send(`${req.session.count}`);
 })
 
 app.get('/fakeUser', async (req, res) => {
