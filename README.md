@@ -1,1 +1,1 @@
-# GoCamp - Place For Your Dream Camping Trip!
+# GoCamp - A CRUD app for campgrounds in the US
