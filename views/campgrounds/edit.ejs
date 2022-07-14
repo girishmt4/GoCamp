@@ -3,8 +3,8 @@
     <div class="row">
         <h1 class="text-center">Edit Campground</h1>
         <div class="col-6 offset-3">
-            <form action="/campgrounds/<%= campground.id %>?_method=put" method="post" novalidate
-                class="validated-form">
+            <form action="/campgrounds/<%= campground.id %>?_method=put" method="post" novalidate class="validated-form"
+                enctype="multipart/form-data">
                 <div class="mb-3">
                     <label class="form-label" for="title">Title</label>
                     <br>
@@ -48,13 +48,17 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label" for="image">Image URL</label>
-                    <br>
-                    <input class="form-control" type="text" id="image" name="campground[image]"
-                        value="<%= campground.image %>" required>
-                    <div class="valid-feedback">
-                        Looks Good!
-                    </div>
+                    <label for="image" class="form-label">Add Images</label>
+                    <input class="form-control form-control-sm" id="image" type="file" name="image" multiple>
+                </div>
+                <div class="mb-3">
+                    <% campground.images.forEach((img,i)=> { %>
+                        <img src="<%= img.url %> " alt="" class="img-thumbnail">
+                        <div class="form-check-inline">
+                            <input type="checkbox" name="deleteImages[]" value="<%= img.filename %>" id="image-<%=i%>">
+                        </div>
+                        <label for="image-<%=i%>">Delete?</label>
+                        <% }) %>
                 </div>
                 <div class="mb-3">
                     <button class="btn btn-primary">Update Campground</button>
