@@ -4,6 +4,8 @@
 
 	<div class="row">
 		<div class="col-6">
+			<div id='map' class="" style='width: 400px; height: 300px;'></div>
+
 			<div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
 				<div class="carousel-inner">
 					<% campground.images.forEach((img,i)=> { %>
@@ -110,3 +112,34 @@
 						<% }) %>
 		</div>
 	</div>
+
+	<script>
+		const mapToken = '<%- process.env.MAPBOX_TOKEN %>';
+		const campgroundCoordinates = <%- JSON.stringify(campground) %>;
+	</script>
+
+
+	<script>
+		mapboxgl.accessToken = mapToken;
+		const map = new mapboxgl.Map({
+			container: 'map', // container ID
+			style: 'mapbox://styles/mapbox/streets-v11', // style URL
+			center: campgroundCoordinates.geometry.coordinates,
+			// center: [-74.5, 40], // starting position [lng, lat]
+			zoom: 9, // starting zoom
+			projection: 'globe' // display the map as a 3D globe
+		});
+		map.on('style.load', () => {
+			map.setFog({}); // Set the default atmosphere style
+		});
+		// Create a default Marker and add it to the map.
+		const marker1 = new mapboxgl.Marker()
+			.setLngLat(campgroundCoordinates.geometry.coordinates)
+			.setPopup(
+				new mapboxgl.Popup({offset: 25})
+				.setHTML(
+					`<h3>${campground.title}</h3>`
+				)
+			)
+			.addTo(map);
+	</script>
